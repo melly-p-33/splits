@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splits — College Track & Field Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal: #0d9e8a;
+  --teal-light: #e6f7f5;
+  --teal-mid: #b2e8e2;
+  --teal-dark: #087a6a;
+  --ink: #111827;
+  --ink-mid: #374151;
+  --ink-light: #6b7280;
+  --ink-faint: #9ca3af;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --bg: #fafafa;
+  --white: #ffffff;
+  --recruit: #0d9e8a;
+  --walkon: #f59e0b;
+  --tryout: #94a3b8;
+  --red: #ef4444;
+  --sidebar-w: 260px;
+  --header-h: 60px;
+  --font-display: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-display);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--header-h);
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 20px;
+}
+
+.logo {
+  display: flex; align-items: baseline; gap: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.logo-word {
+  font-size: 1.25rem; font-weight: 600; letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.logo-dot { color: var(--teal); font-size: 1.5rem; line-height: 1; }
+
+.header-search {
+  flex: 1; max-width: 480px;
+  position: relative;
+}
+.header-search input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--border-light);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.header-search input:focus {
+  border-color: var(--teal);
+  background: var(--white);
+}
+.header-search input::placeholder { color: var(--ink-faint); }
+.search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-faint); pointer-events: none;
+  font-size: 0.875rem;
+}
+
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+.pr-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--teal-light);
+  border: 1px solid var(--teal-mid);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+.pr-bar label {
+  font-size: 0.75rem; font-weight: 500; color: var(--teal-dark);
+  white-space: nowrap;
+}
+.pr-bar select, .pr-bar input {
+  border: none; background: transparent;
+  font-family: var(--font-mono); font-size: 0.8rem;
+  color: var(--ink); outline: none; cursor: pointer;
+}
+.pr-bar input { width: 72px; }
+.pr-bar input::placeholder { color: var(--ink-faint); font-style: italic; }
+.pr-bar-btn {
+  background: var(--teal); color: white;
+  border: none; border-radius: 6px;
+  padding: 4px 10px; font-size: 0.75rem; font-weight: 500;
+  cursor: pointer; font-family: var(--font-display);
+  transition: background 0.15s;
+}
+.pr-bar-btn:hover { background: var(--teal-dark); }
+
+.refresh-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-display); font-size: 0.8rem;
+  color: var(--ink-mid); cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.refresh-btn:hover { border-color: var(--teal); color: var(--teal); }
+.refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+.refresh-btn svg { transition: transform 0.4s; }
+.refresh-btn.loading svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── LAYOUT ── */
+.app-body {
+  display: flex;
+  padding-top: var(--header-h);
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+aside {
+  position: fixed;
+  top: var(--header-h); bottom: 0; left: 0;
+  width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex; flex-direction: column; gap: 24px;
+  z-index: 50;
+}
+
+.filter-group {}
+.filter-label {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.filter-pills {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.pill {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all 0.12s;
+  background: var(--white);
+  user-select: none;
+}
+.pill:hover { border-color: var(--teal); color: var(--teal); }
+.pill.active {
+  background: var(--teal); border-color: var(--teal);
+  color: white; font-weight: 500;
+}
+
+.filter-checkboxes { display: flex; flex-direction: column; gap: 6px; }
+.filter-check {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; color: var(--ink-mid);
+  cursor: pointer; user-select: none;
+}
+.filter-check input[type=checkbox] {
+  accent-color: var(--teal);
+  width: 14px; height: 14px; cursor: pointer;
+}
+
+.conference-list {
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 200px; overflow-y: auto;
+}
+.conf-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 6px; border-radius: 6px;
+  font-size: 0.8rem; color: var(--ink-mid);
+  cursor: pointer; transition: background 0.1s;
+}
+.conf-item:hover { background: var(--border-light); }
+.conf-item input[type=checkbox] { accent-color: var(--teal); cursor: pointer; }
+.conf-item.active { color: var(--teal); font-weight: 500; }
+
+.event-select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-display); font-size: 0.82rem;
+  color: var(--ink); background: var(--white);
+  outline: none; cursor: pointer;
+}
+.event-select:focus { border-color: var(--teal); }
+
+.clear-filters {
+  font-size: 0.75rem; color: var(--ink-faint);
+  cursor: pointer; text-decoration: underline;
+  background: none; border: none;
+  padding: 0; font-family: var(--font-display);
+  align-self: flex-start;
+}
+.clear-filters:hover { color: var(--teal); }
+
+/* ── MAIN ── */
+main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: 24px;
+  max-width: 1200px;
+}
+
+.results-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.results-count {
+  font-size: 0.82rem; color: var(--ink-faint);
+  font-family: var(--font-mono);
+}
+
+.pr-match-banner {
+  display: none;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: var(--teal-light);
+  border: 1px solid var(--teal-mid);
+  border-radius: 8px;
+  font-size: 0.82rem; color: var(--teal-dark);
+  align-items: center; gap: 10px;
+}
+.pr-match-banner.visible { display: flex; }
+.pr-match-banner strong { font-weight: 600; }
+.match-legend {
+  display: flex; gap: 12px; margin-left: auto;
+}
+.match-dot {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.75rem; color: var(--ink-mid);
+}
+.match-dot::before {
+  content: '';
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block;
+}
+.match-dot.recruit::before { background: var(--recruit); }
+.match-dot.walkon::before { background: var(--walkon); }
+.match-dot.tryout::before { background: var(--tryout); }
+
+/* ── SCHOOL CARDS ── */
+.school-grid {
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.school-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.school-card:hover { box-shadow: var(--shadow-md); border-color: var(--teal-mid); }
+
+.school-card.match-recruit { border-left: 3px solid var(--recruit); }
+.school-card.match-walkon { border-left: 3px solid var(--walkon); }
+.school-card.match-tryout { border-left: 3px solid var(--tryout); }
+
+.card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-light);
+}
+.card-header:hover { background: var(--border-light); }
+
+.school-name {
+  font-size: 0.95rem; font-weight: 600; color: var(--ink);
+}
+.school-meta {
+  font-size: 0.75rem; color: var(--ink-faint);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+.card-badges { display: flex; gap: 6px; margin-left: auto; align-items: center; }
+.badge {
+  padding: 2px 8px; border-radius: 12px;
+  font-size: 0.7rem; font-weight: 500;
+  border: 1px solid currentColor;
+}
+.badge-div1 { color: #7c3aed; border-color: #ede9fe; background: #ede9fe; }
+.badge-div2 { color: #0369a1; border-color: #e0f2fe; background: #e0f2fe; }
+.badge-div3 { color: #047857; border-color: #d1fae5; background: #d1fae5; }
+.badge-naia { color: #b45309; border-color: #fef3c7; background: #fef3c7; }
+
+.match-badge {
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 0.7rem; font-weight: 600; color: white;
+}
+.match-badge.recruit { background: var(--recruit); }
+.match-badge.walkon { background: var(--walkon); }
+.match-badge.tryout { background: var(--tryout); color: var(--ink); }
+
+.expand-icon {
+  color: var(--ink-faint); font-size: 0.75rem;
+  transition: transform 0.2s;
+  margin-left: 4px;
+}
+.school-card.open .expand-icon { transform: rotate(180deg); }
+
+/* ── CARD BODY ── */
+.card-body {
+  display: none;
+  padding: 16px 18px;
+}
+.school-card.open .card-body { display: block; }
+
+.card-tabs {
+  display: flex; gap: 0; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card-tab {
+  padding: 7px 16px;
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--ink-faint); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.card-tab:hover { color: var(--ink); }
+.card-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+.card-tab-panel { display: none; }
+.card-tab-panel.active { display: block; }
+
+/* ── PERFORMANCE TABLE ── */
+.perf-section { margin-bottom: 20px; }
+.perf-section-title {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.gender-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.gender-tab {
+  padding: 4px 12px; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  color: var(--ink-mid); background: var(--white);
+  transition: all 0.12s;
+}
+.gender-tab.active { background: var(--teal); border-color: var(--teal); color: white; }
+
+.perf-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.perf-table th {
+  text-align: left; padding: 6px 10px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ink-faint);
+  border-bottom: 1px solid var(--border);
+}
+.perf-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--ink-mid);
+}
+.perf-table tr:last-child td { border-bottom: none; }
+.perf-table .rank { font-family: var(--font-mono); color: var(--ink-faint); font-size: 0.75rem; }
+.perf-table .time { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+.perf-table .athlete { color: var(--ink); font-weight: 400; }
+.perf-table .grade { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint); }
+.perf-table .year { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint); }
+.perf-table .event-col { font-weight: 500; color: var(--ink); }
+.tfrrs-link { color: var(--teal); text-decoration: none; font-size: 0.75rem; }
+.tfrrs-link:hover { text-decoration: underline; }
+
+/* ── RECRUITING TABLE ── */
+.recruit-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.recruit-table th {
+  text-align: left; padding: 6px 10px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ink-faint);
+  border-bottom: 1px solid var(--border);
+}
+.recruit-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.recruit-table tr:last-child td { border-bottom: none; }
+.recruit-table .event-name { font-weight: 500; color: var(--ink); }
+.recruit-tier {
+  font-family: var(--font-mono); font-size: 0.8rem;
+  padding: 2px 7px; border-radius: 5px;
+  font-weight: 500; display: inline-block;
+}
+.recruit-tier.recruit { background: #dcfce7; color: #166534; }
+.recruit-tier.walkon { background: #fef9c3; color: #854d0e; }
+.recruit-tier.tryout { background: #f1f5f9; color: #475569; }
+.runcruit-link { color: var(--teal); text-decoration: none; font-size: 0.75rem; }
+.runcruit-link:hover { text-decoration: underline; }
+
+/* ── SEASON TOGGLE ── */
+.season-toggle {
+  display: flex; gap: 0; margin-bottom: 12px;
+  background: var(--border-light); border-radius: 8px;
+  padding: 3px; width: fit-content;
+}
+.season-btn {
+  padding: 5px 14px; border-radius: 6px;
+  font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; border: none; background: transparent;
+  color: var(--ink-faint); font-family: var(--font-display);
+  transition: all 0.15s;
+}
+.season-btn.active { background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+
+/* ── EMPTY / LOADING STATES ── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--ink-faint);
+}
+.empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 0.9rem; }
+
+.loading-state {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 8px 0;
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* ── DATA SOURCE NOTE ── */
+.data-note {
+  font-size: 0.72rem; color: var(--ink-faint);
+  margin-top: 8px;
+  font-style: italic;
+}
+.data-note a { color: var(--teal); text-decoration: none; }
+.data-note a:hover { text-decoration: underline; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 0px; }
+  aside {
+    position: fixed;
+    top: var(--header-h); bottom: 0;
+    left: -280px; width: 280px;
+    transition: left 0.25s ease;
+    z-index: 200;
+    box-shadow: var(--shadow-md);
+  }
+  aside.open { left: 0; }
+  main { margin-left: 0; padding: 16px; }
+  .pr-bar { display: none; }
+  .mobile-filter-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 0.8rem; color: var(--ink-mid);
+    cursor: pointer; font-family: var(--font-display);
+  }
+}
+@media (min-width: 769px) {
+  .mobile-filter-btn { display: none; }
+}
+
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 150;
+}
+.overlay.visible { display: block; }
+</style>
+<!-- data.js injected by scraper for file:// compatibility -->
+<script src="data.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#">
+    <span class="logo-word">Splits</span>
+    <span class="logo-dot">·</span>
+  </a>
+
+  <div class="header-search">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="schoolSearch" placeholder="Search schools…" oninput="filterSchools()">
+  </div>
+
+  <!-- PR Matcher -->
+  <div class="header-right">
+    <div class="pr-bar">
+      <label>My PR</label>
+      <select id="prGender" onchange="applyPR()">
+        <option value="men">Men</option>
+        <option value="women">Women</option>
+      </select>
+      <select id="prEvent" onchange="applyPR()">
+        <option value="">Event</option>
+        <option>100m</option><option>200m</option><option>400m</option>
+        <option>800m</option><option>1500m</option><option>Mile</option>
+        <option>3000m</option><option>5000m</option><option>10000m</option>
+        <option>4×100</option><option>4×400</option>
+        <option>Indoor 200m</option><option>Indoor 400m</option>
+        <option>Indoor 800m</option><option>Indoor Mile</option>
+        <option>Indoor 3000m</option><option>Indoor 5000m</option>
+        <option>Indoor 4×400</option>
+      </select>
+      <input type="text" id="prTime" placeholder="e.g. 4:12.3" oninput="applyPR()">
+      <button class="pr-bar-btn" onclick="clearPR()">Clear</button>
+    </div>
+
+    <button class="mobile-filter-btn" onclick="toggleSidebar()">
+      ☰ Filters
+    </button>
+
+    <span id="lastUpdated" style="font-size:0.75rem;color:var(--ink-faint);"></span>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="app-body">
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+
+  <div class="filter-group">
+    <div class="filter-label">Gender</div>
+    <div class="filter-pills">
+      <div class="pill active" onclick="togglePill(this,'gender','both')" data-group="gender" data-val="both">Both</div>
+      <div class="pill" onclick="togglePill(this,'gender','men')" data-group="gender" data-val="men">Men</div>
+      <div class="pill" onclick="togglePill(this,'gender','women')" data-group="gender" data-val="women">Women</div>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-label">Division</div>
+    <div class="filter-pills">
+      <div class="pill active" onclick="togglePill(this,'division','all')" data-group="division" data-val="all">All</div>
+      <div class="pill" onclick="togglePill(this,'division','D1')" data-group="division" data-val="D1">D1</div>
+      <div class="pill" onclick="togglePill(this,'division','D2')" data-group="division" data-val="D2">D2</div>
+      <div class="pill" onclick="togglePill(this,'division','D3')" data-group="division" data-val="D3">D3</div>
+      <div class="pill" onclick="togglePill(this,'division','NAIA')" data-group="division" data-val="NAIA">NAIA</div>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-label">Season</div>
+    <div class="filter-pills">
+      <div class="pill active" onclick="togglePill(this,'season','both')" data-group="season" data-val="both">Both</div>
+      <div class="pill" onclick="togglePill(this,'season','outdoor')" data-group="season" data-val="outdoor">Outdoor</div>
+      <div class="pill" onclick="togglePill(this,'season','indoor')" data-group="season" data-val="indoor">Indoor</div>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-label">Event</div>
+    <select class="event-select" id="eventFilter" onchange="filterSchools()">
+      <option value="">All running events</option>
+      <optgroup label="Outdoor">
+        <option>100m</option><option>200m</option><option>400m</option>
+        <option>800m</option><option>1500m</option><option>Mile</option>
+        <option>5000m</option><option>10000m</option>
+        <option>4×100</option><option>4×400</option>
+      </optgroup>
+      <optgroup label="Indoor">
+        <option>Indoor 200m</option><option>Indoor 400m</option>
+        <option>Indoor 800m</option><option>Indoor Mile</option>
+        <option>Indoor 3000m</option><option>Indoor 5000m</option>
+        <option>Indoor 4×400</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-label">Conference</div>
+    <div class="conference-list" id="conferenceList"></div>
+  </div>
+
+  <button class="clear-filters" onclick="clearAllFilters()">Clear all filters</button>
+
+</aside>
+
+<!-- MAIN -->
+<main>
+  <div class="results-header">
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <div class="pr-match-banner" id="prBanner">
+    <span>Showing PR matches for <strong id="prBannerText"></strong></span>
+    <div class="match-legend">
+      <span class="match-dot recruit">Recruit</span>
+      <span class="match-dot walkon">Walk-on</span>
+      <span class="match-dot tryout">Tryout</span>
+    </div>
+  </div>
+
+  <div class="school-grid" id="schoolGrid"></div>
+</main>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA — loaded from data.json (generated by scrape_splits.py)
+// ─────────────────────────────────────────────
+
+const CONFERENCES = [
+  "ACC","Big Ten","Big 12","Pac-12","SEC","Ivy League",
+  "MAC","Mountain West","American","Conference USA","Sun Belt",
+  "WAC","Big Sky","CAA","Missouri Valley","Patriot","Southern",
+  "Big South","Northeast","Ohio Valley","Southland","SWAC","MEAC",
+  "America East","Atlantic 10","WCC","Horizon","Summit","Big West",
+  "GNAC","CCAA","MIAA","NSIC","GLIAC","GSC","PSAC","RMAC","CIAA",
+  "SIAC","SAA","PAC","NAIA – Ind."
+];
+
+const DIVISIONS = ["D1","D2","D3","NAIA"];
+
+// Sample schools — in production, populated by scraper
+const SAMPLE_SCHOOLS = [
+  {
+    id: "stanford", name: "Stanford University",
+    division: "D1", conference: "Pac-12", state: "CA",
+    tfrrs_url: "https://www.tfrrs.org/teams/CA_college_m_Stanford.html",
+    runcruit_url: "https://runcruit.com/standards/stanford-university",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"800m", rank:1, athlete:"Cole Hocker", grade:"SR", year:2024, time:"1:44.21", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:2, athlete:"Jack Yearian", grade:"JR", year:2024, time:"1:45.88", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:3, athlete:"Miles Sims", grade:"SO", year:2025, time:"1:46.14", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:1, athlete:"Nico Young", grade:"SR", year:2024, time:"3:55.41", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:2, athlete:"Drew Hunter", grade:"JR", year:2024, time:"3:57.12", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:3, athlete:"Jake Heyward", grade:"SO", year:2023, time:"3:58.77", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:1, athlete:"Nico Young", grade:"SR", year:2024, time:"13:08.11", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:2, athlete:"Aidan Ryan", grade:"JR", year:2024, time:"13:14.60", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:3, athlete:"Charles Hicks", grade:"SR", year:2023, time:"13:17.42", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: [
+            { event:"Mile", rank:1, athlete:"Grant Fisher", grade:"SR", year:2018, time:"3:51.23", tfrrs_url:"https://www.tfrrs.org" },
+          ]
+        },
+        indoor: {
+          current: [
+            { event:"Indoor Mile", rank:1, athlete:"Nico Young", grade:"SR", year:2024, time:"3:53.22", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Indoor Mile", rank:2, athlete:"Drew Hunter", grade:"JR", year:2024, time:"3:56.10", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Indoor Mile", rank:3, athlete:"Jake Heyward", grade:"SO", year:2024, time:"3:57.88", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        }
+      },
+      women: {
+        outdoor: {
+          current: [
+            { event:"1500m", rank:1, athlete:"Elise Cranny", grade:"SR", year:2019, time:"4:04.32", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"1500m", rank:2, athlete:"Alicia Monson", grade:"JR", year:2024, time:"4:05.71", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"1500m", rank:3, athlete:"Sara Vaughn", grade:"SO", year:2024, time:"4:07.55", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"800m", recruit:"1:48.0", walkon:"1:52.0", tryout:"1:55.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+        { event:"Mile", recruit:"4:02.0", walkon:"4:08.0", tryout:"4:14.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+        { event:"5000m", recruit:"13:30.0", walkon:"13:55.0", tryout:"14:20.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+        { event:"10000m", recruit:"28:30.0", walkon:"29:30.0", tryout:"30:30.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+      ],
+      women: [
+        { event:"800m", recruit:"2:06.0", walkon:"2:10.0", tryout:"2:14.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+        { event:"1500m", recruit:"4:18.0", walkon:"4:26.0", tryout:"4:34.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+        { event:"5000m", recruit:"15:30.0", walkon:"16:10.0", tryout:"16:50.0", runcruit_url:"https://runcruit.com/standards/stanford-university" },
+      ]
+    }
+  },
+  {
+    id: "oregon", name: "University of Oregon",
+    division: "D1", conference: "Pac-12", state: "OR",
+    tfrrs_url: "https://www.tfrrs.org/teams/OR_college_m_Oregon.html",
+    runcruit_url: "https://runcruit.com/standards/university-of-oregon",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"800m", rank:1, athlete:"Isaiah Jewett", grade:"SR", year:2024, time:"1:43.92", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:2, athlete:"Cooper Teare", grade:"JR", year:2024, time:"1:44.88", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:3, athlete:"Mac Fleet", grade:"SO", year:2024, time:"1:46.02", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:1, athlete:"Cooper Teare", grade:"JR", year:2024, time:"3:53.78", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:2, athlete:"Mick Stanovnik", grade:"SR", year:2024, time:"3:56.11", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:3, athlete:"Josh Thompson", grade:"FR", year:2025, time:"3:58.44", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      },
+      women: {
+        outdoor: {
+          current: [
+            { event:"1500m", rank:1, athlete:"Sinclaire Johnson", grade:"SR", year:2024, time:"4:02.18", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"1500m", rank:2, athlete:"Jessica Hull", grade:"JR", year:2023, time:"4:04.40", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"1500m", rank:3, athlete:"Kayla Windeatt", grade:"SO", year:2024, time:"4:07.10", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"800m", recruit:"1:47.5", walkon:"1:51.5", tryout:"1:55.0", runcruit_url:"https://runcruit.com/standards/university-of-oregon" },
+        { event:"Mile", recruit:"4:00.0", walkon:"4:06.0", tryout:"4:12.0", runcruit_url:"https://runcruit.com/standards/university-of-oregon" },
+        { event:"5000m", recruit:"13:25.0", walkon:"13:50.0", tryout:"14:15.0", runcruit_url:"https://runcruit.com/standards/university-of-oregon" },
+      ],
+      women: [
+        { event:"1500m", recruit:"4:15.0", walkon:"4:24.0", tryout:"4:33.0", runcruit_url:"https://runcruit.com/standards/university-of-oregon" },
+        { event:"5000m", recruit:"15:20.0", walkon:"16:00.0", tryout:"16:45.0", runcruit_url:"https://runcruit.com/standards/university-of-oregon" },
+      ]
+    }
+  },
+  {
+    id: "michigan", name: "University of Michigan",
+    division: "D1", conference: "Big Ten", state: "MI",
+    tfrrs_url: "https://www.tfrrs.org/teams/MI_college_m_Michigan.html",
+    runcruit_url: "https://runcruit.com/standards/university-of-michigan",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"400m", rank:1, athlete:"Brandon Miller", grade:"JR", year:2024, time:"44.82", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:2, athlete:"Devin Dixon", grade:"SO", year:2024, time:"45.14", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:3, athlete:"Cameron Burrell", grade:"FR", year:2025, time:"45.60", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:1, athlete:"Ethan Strand", grade:"SR", year:2024, time:"1:46.22", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:2, athlete:"Hobbs Kessler", grade:"JR", year:2024, time:"1:46.90", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"800m", rank:3, athlete:"Alex Amankwah", grade:"SO", year:2024, time:"1:47.44", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: {
+          current: [
+            { event:"Indoor 400m", rank:1, athlete:"Brandon Miller", grade:"JR", year:2024, time:"45.30", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Indoor 400m", rank:2, athlete:"Devin Dixon", grade:"SO", year:2024, time:"45.77", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Indoor 400m", rank:3, athlete:"Cameron Burrell", grade:"FR", year:2025, time:"46.10", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        }
+      },
+      women: {
+        outdoor: {
+          current: [
+            { event:"400m", rank:1, athlete:"Leah Anderson", grade:"SR", year:2024, time:"51.88", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:2, athlete:"Trinity Flagler", grade:"JR", year:2024, time:"52.41", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:3, athlete:"Nadia Golden", grade:"SO", year:2024, time:"53.02", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"400m", recruit:"46.2", walkon:"47.5", tryout:"48.5", runcruit_url:"https://runcruit.com/standards/university-of-michigan" },
+        { event:"800m", recruit:"1:49.0", walkon:"1:53.0", tryout:"1:56.5", runcruit_url:"https://runcruit.com/standards/university-of-michigan" },
+        { event:"Mile", recruit:"4:05.0", walkon:"4:11.0", tryout:"4:17.0", runcruit_url:"https://runcruit.com/standards/university-of-michigan" },
+      ],
+      women: [
+        { event:"400m", recruit:"53.5", walkon:"55.0", tryout:"56.5", runcruit_url:"https://runcruit.com/standards/university-of-michigan" },
+        { event:"800m", recruit:"2:08.0", walkon:"2:12.0", tryout:"2:16.0", runcruit_url:"https://runcruit.com/standards/university-of-michigan" },
+      ]
+    }
+  },
+  {
+    id: "harvard", name: "Harvard University",
+    division: "D1", conference: "Ivy League", state: "MA",
+    tfrrs_url: "https://www.tfrrs.org/teams/MA_college_m_Harvard.html",
+    runcruit_url: "https://runcruit.com/standards/harvard-university",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"Mile", rank:1, athlete:"Kieran Wood", grade:"SR", year:2024, time:"3:58.22", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:2, athlete:"Oliver Hoare", grade:"JR", year:2024, time:"4:00.14", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"Mile", rank:3, athlete:"Ryan Ford", grade:"SO", year:2024, time:"4:02.88", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      },
+      women: {
+        outdoor: {
+          current: [
+            { event:"5000m", rank:1, athlete:"Gabby Smyth", grade:"SR", year:2024, time:"15:44.12", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:2, athlete:"Elinor Kirk", grade:"JR", year:2024, time:"15:52.40", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:3, athlete:"Eliza Heany", grade:"SO", year:2024, time:"16:02.77", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"Mile", recruit:"4:06.0", walkon:"4:14.0", tryout:"4:22.0", runcruit_url:"https://runcruit.com/standards/harvard-university" },
+        { event:"5000m", recruit:"14:00.0", walkon:"14:30.0", tryout:"15:00.0", runcruit_url:"https://runcruit.com/standards/harvard-university" },
+      ],
+      women: [
+        { event:"5000m", recruit:"16:30.0", walkon:"17:10.0", tryout:"17:50.0", runcruit_url:"https://runcruit.com/standards/harvard-university" },
+        { event:"1500m", recruit:"4:28.0", walkon:"4:38.0", tryout:"4:48.0", runcruit_url:"https://runcruit.com/standards/harvard-university" },
+      ]
+    }
+  },
+  {
+    id: "unc-charlotte", name: "UNC Charlotte",
+    division: "D1", conference: "American", state: "NC",
+    tfrrs_url: "https://www.tfrrs.org/teams/NC_college_m_Charlotte.html",
+    runcruit_url: "https://runcruit.com/standards/unc-charlotte",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"400m", rank:1, athlete:"Marcus Webb", grade:"JR", year:2024, time:"45.88", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:2, athlete:"Deon Lendore", grade:"SO", year:2024, time:"46.22", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"400m", rank:3, athlete:"Elijah Hall", grade:"FR", year:2025, time:"46.77", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      },
+      women: {
+        outdoor: { current: [], alltime: [] },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"100m", recruit:"10.45", walkon:"10.65", tryout:"10.85", runcruit_url:"https://runcruit.com/standards/unc-charlotte" },
+        { event:"400m", recruit:"47.0", walkon:"48.2", tryout:"49.5", runcruit_url:"https://runcruit.com/standards/unc-charlotte" },
+      ],
+      women: []
+    }
+  },
+  {
+    id: "adams-state", name: "Adams State University",
+    division: "D2", conference: "RMAC", state: "CO",
+    tfrrs_url: "https://www.tfrrs.org/teams/CO_college_m_Adams_State.html",
+    runcruit_url: "https://runcruit.com/standards/adams-state-university",
+    performances: {
+      men: {
+        outdoor: {
+          current: [
+            { event:"5000m", rank:1, athlete:"Tyler Day", grade:"SR", year:2024, time:"13:22.40", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:2, athlete:"Patrick Davey", grade:"JR", year:2024, time:"13:28.11", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:3, athlete:"Samuel Chelanga", grade:"SO", year:2024, time:"13:35.77", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"10000m", rank:1, athlete:"Tyler Day", grade:"SR", year:2024, time:"27:44.10", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"10000m", rank:2, athlete:"Patrick Davey", grade:"JR", year:2024, time:"28:01.22", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"10000m", rank:3, athlete:"Samuel Chelanga", grade:"SO", year:2024, time:"28:14.88", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      },
+      women: {
+        outdoor: {
+          current: [
+            { event:"5000m", rank:1, athlete:"Dani Jones", grade:"SR", year:2024, time:"15:22.14", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:2, athlete:"Makena Morley", grade:"JR", year:2024, time:"15:33.80", tfrrs_url:"https://www.tfrrs.org" },
+            { event:"5000m", rank:3, athlete:"Rachel McArthur", grade:"SO", year:2024, time:"15:44.55", tfrrs_url:"https://www.tfrrs.org" },
+          ],
+          alltime: []
+        },
+        indoor: { current: [], alltime: [] }
+      }
+    },
+    recruiting: {
+      men: [
+        { event:"5000m", recruit:"13:45.0", walkon:"14:15.0", tryout:"14:45.0", runcruit_url:"https://runcruit.com/standards/adams-state-university" },
+        { event:"10000m", recruit:"28:30.0", walkon:"29:30.0", tryout:"30:30.0", runcruit_url:"https://runcruit.com/standards/adams-state-university" },
+      ],
+      women: [
+        { event:"5000m", recruit:"16:10.0", walkon:"16:50.0", tryout:"17:30.0", runcruit_url:"https://runcruit.com/standards/adams-state-university" },
+      ]
+    }
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let schools = [];
+let filters = { gender: 'both', division: 'all', season: 'both', event: '', conferences: new Set() };
+let prMatch = { gender: '', event: '', time: '' };
+let lastUpdated = null;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+async function init() {
+  buildConferenceList();
+  await loadData();
+}
+
+async function loadData() {
+  const grid = document.getElementById('schoolGrid');
+  grid.innerHTML = `<div class="loading-state">
+    <div class="skeleton" style="height:60px;"></div>
+    <div class="skeleton" style="height:60px;"></div>
+    <div class="skeleton" style="height:60px;"></div>
+    <div class="skeleton" style="height:60px;"></div>
+    <div class="skeleton" style="height:60px;"></div>
+  </div>`;
+
+  // Try fetch first (works on GitHub Pages and local servers)
+  // Also works when file is opened directly in Chrome (not Safari/Firefox)
+  let data = null;
+
+  try {
+    const r = await fetch('./data.json');
+    if (r.ok) {
+      data = await r.json();
+    }
+  } catch(e) {
+    // fetch blocked (file:// in Firefox/Safari) — try window.__splitsData
+    // which gets injected by a <script src="data.js"> if present
+  }
+
+  // Fallback: check for data injected via data.js (for file:// protocol)
+  if (!data && window.__splitsData) {
+    data = window.__splitsData;
+  }
+
+  if (data && data.schools && data.schools.length > 0) {
+    schools = data.schools.sort((a,b) => a.name.localeCompare(b.name));
+    if (data.meta?.last_updated) {
+      const d = new Date(data.meta.last_updated);
+      document.title = `Splits · ${data.meta.school_count || schools.length} schools`;
+      // Show last updated
+      const lu = document.getElementById('lastUpdated');
+      if (lu) lu.textContent = 'Updated ' + d.toLocaleDateString();
+    }
+    renderSchools();
+    updateCount();
+  } else {
+    // Final fallback: sample data
+    schools = SAMPLE_SCHOOLS.sort((a,b) => a.name.localeCompare(b.name));
+    renderSchools();
+    updateCount();
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 16px;font-size:0.82rem;color:#854d0e;margin-bottom:16px;';
+    banner.innerHTML = '⚠️ Showing sample data. Run <strong>refresh.command</strong> to scrape real data.';
+    document.getElementById('schoolGrid').before(banner);
+  }
+}
+
+function buildConferenceList() {
+  const list = document.getElementById('conferenceList');
+  CONFERENCES.forEach(conf => {
+    const item = document.createElement('label');
+    item.className = 'conf-item';
+    item.innerHTML = `<input type="checkbox" value="${conf}" onchange="toggleConference('${conf}',this.checked)"> ${conf}`;
+    list.appendChild(item);
+  });
+}
+
+// ─────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────
+function togglePill(el, group, val) {
+  document.querySelectorAll(`.pill[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  filters[group] = val;
+  filterSchools();
+}
+
+function toggleConference(conf, checked) {
+  if (checked) filters.conferences.add(conf);
+  else filters.conferences.delete(conf);
+  document.querySelectorAll('.conf-item').forEach(item => {
+    const cb = item.querySelector('input');
+    if (cb && filters.conferences.has(cb.value)) item.classList.add('active');
+    else item.classList.remove('active');
+  });
+  filterSchools();
+}
+
+function clearAllFilters() {
+  filters = { gender: 'both', division: 'all', season: 'both', event: '', conferences: new Set() };
+  document.querySelectorAll('.pill[data-group="gender"]').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill[data-val="both"][data-group="gender"]').classList.add('active');
+  document.querySelectorAll('.pill[data-group="division"]').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill[data-val="all"]').classList.add('active');
+  document.querySelectorAll('.pill[data-group="season"]').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill[data-val="both"][data-group="season"]').classList.add('active');
+  document.getElementById('eventFilter').value = '';
+  document.querySelectorAll('.conf-item input').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('.conf-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('schoolSearch').value = '';
+  filterSchools();
+}
+
+function filterSchools() {
+  filters.event = document.getElementById('eventFilter').value;
+  const search = document.getElementById('schoolSearch').value.toLowerCase();
+  const visible = schools.filter(s => {
+    if (search && !s.name.toLowerCase().includes(search) && !(s.conference||'').toLowerCase().includes(search)) return false;
+    if (filters.division !== 'all' && s.division !== filters.division) return false;
+    if (filters.conferences.size > 0 && !filters.conferences.has(s.conference)) return false;
+    return true;
+  });
+  renderSchools(visible);
+  updateCount(visible.length);
+}
+
+function updateCount(n) {
+  const total = n !== undefined ? n : schools.length;
+  document.getElementById('resultsCount').textContent = `${total} school${total !== 1 ? 's' : ''}`;
+}
+
+// ─────────────────────────────────────────────
+// PR MATCHING
+// ─────────────────────────────────────────────
+function parseTime(str) {
+  if (!str) return null;
+  str = str.trim().replace(',', '.');
+  const parts = str.split(':');
+  if (parts.length === 3) return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
+  if (parts.length === 2) return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+  return parseFloat(str);
+}
+
+function applyPR() {
+  prMatch.gender = document.getElementById('prGender').value;
+  prMatch.event = document.getElementById('prEvent').value;
+  prMatch.time = document.getElementById('prTime').value;
+  const banner = document.getElementById('prBanner');
+  if (prMatch.event && prMatch.time && parseTime(prMatch.time)) {
+    banner.classList.add('visible');
+    document.getElementById('prBannerText').textContent = `${prMatch.event} ${prMatch.time} (${prMatch.gender})`;
+  } else {
+    banner.classList.remove('visible');
+  }
+  filterSchools();
+}
+
+function clearPR() {
+  prMatch = { gender: '', event: '', time: '' };
+  document.getElementById('prTime').value = '';
+  document.getElementById('prEvent').value = '';
+  document.getElementById('prBanner').classList.remove('visible');
+  document.querySelectorAll('.school-card').forEach(c => c.classList.remove('match-recruit','match-walkon','match-tryout'));
+}
+
+function getMatchTier(school, gender, event, timeStr) {
+  // Compare PR against team's current season top performers from TFRRS
+  // Recruit  = faster than or within 1% of team's #1 time
+  // Walk-on  = within 3% of team's #1 time (would rank in top 3)
+  // Tryout   = within 6% of team's #1 time (competitive but needs development)
+  const prTime = parseTime(timeStr);
+  if (!prTime) return null;
+
+  const perfs = school.performances?.[gender]?.outdoor?.current || [];
+  const eventPerfs = perfs.filter(p => p.event === event);
+  if (eventPerfs.length === 0) return null;
+
+  // Get the top (fastest) time for this event
+  const times = eventPerfs.map(p => parseTime(p.time)).filter(Boolean);
+  if (times.length === 0) return null;
+  const topTime = Math.min(...times);
+
+  // For running, lower time = faster = better
+  // Calculate how much slower the PR is vs the team's best
+  const pctSlower = (prTime - topTime) / topTime;
+
+  if (pctSlower <= 0.01) return 'recruit';   // within 1% of #1 = recruit level
+  if (pctSlower <= 0.03) return 'walkon';    // within 3% = walk-on
+  if (pctSlower <= 0.06) return 'tryout';    // within 6% = tryout
+  return null;
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderSchools(list) {
+  const grid = document.getElementById('schoolGrid');
+  let toRender = list || schools;
+
+  if (toRender.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>No schools match your filters</p>
+    </div>`;
+    return;
+  }
+
+  // When PR is active, sort matches to top
+  if (prMatch.event && prMatch.time && parseTime(prMatch.time)) {
+    const tierOrder = { recruit: 0, walkon: 1, tryout: 2, null: 3 };
+    toRender = [...toRender].sort((a, b) => {
+      const ta = tierOrder[getMatchTier(a, prMatch.gender, prMatch.event, prMatch.time)] ?? 3;
+      const tb = tierOrder[getMatchTier(b, prMatch.gender, prMatch.event, prMatch.time)] ?? 3;
+      if (ta !== tb) return ta - tb;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  grid.innerHTML = toRender.map(s => renderSchoolCard(s)).join('');
+}
+
+function renderSchoolCard(school) {
+  const divBadge = { D1:'badge-div1', D2:'badge-div2', D3:'badge-div3', NAIA:'badge-naia' }[school.division] || '';
+
+  let matchClass = '';
+  let matchBadge = '';
+  if (prMatch.event && prMatch.time) {
+    const tier = getMatchTier(school, prMatch.gender, prMatch.event, prMatch.time);
+    if (tier) {
+      matchClass = `match-${tier}`;
+      matchBadge = `<span class="match-badge ${tier}">${tier === 'walkon' ? 'Walk-on' : tier.charAt(0).toUpperCase()+tier.slice(1)}</span>`;
+    }
+  }
+
+  return `<div class="school-card ${matchClass}" id="card-${school.id}">
+    <div class="card-header" onclick="toggleCard('${school.id}')">
+      <div>
+        <div class="school-name">${school.name}</div>
+        <div class="school-meta">${school.conference || ''} · ${school.state || ''}</div>
+      </div>
+      <div class="card-badges">
+        ${matchBadge}
+        <span class="badge ${divBadge}">${school.division}</span>
+        <span class="expand-icon">▾</span>
+      </div>
+    </div>
+    <div class="card-body" id="body-${school.id}">
+      <div class="card-tabs">
+        <div class="card-tab active" onclick="switchTab('${school.id}','perf',this)">Performances</div>
+        <div class="card-tab" onclick="switchTab('${school.id}','recruit',this)">Recruiting Standards</div>
+      </div>
+      <div class="card-tab-panel active" id="tab-perf-${school.id}">
+        ${renderPerfPanel(school)}
+      </div>
+      <div class="card-tab-panel" id="tab-recruit-${school.id}">
+        ${renderRecruitPanel(school)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPerfPanel(school) {
+  const genders = filters.gender === 'both' ? ['men','women'] : [filters.gender];
+  let html = '';
+
+  genders.forEach(gender => {
+    const seasons = filters.season === 'both' ? ['outdoor','indoor'] : [filters.season];
+    const periods = ['current','alltime'];
+
+    html += `<div class="perf-section">
+      <div class="perf-section-title">${gender.charAt(0).toUpperCase()+gender.slice(1)}</div>`;
+
+    seasons.forEach(season => {
+      const seasonData = school.performances[gender]?.[season] || {};
+
+      periods.forEach(period => {
+        const rows = seasonData[period] || [];
+        const filtered = filters.event ? rows.filter(r => r.event === filters.event) : rows;
+        if (filtered.length === 0) return;
+
+        const byEvent = {};
+        filtered.forEach(r => {
+          if (!byEvent[r.event]) byEvent[r.event] = [];
+          byEvent[r.event].push(r);
+        });
+
+        html += `<div style="margin-bottom:12px;">
+          <div style="font-size:0.72rem;color:var(--ink-faint);margin-bottom:6px;font-family:var(--font-mono);">
+            ${season.charAt(0).toUpperCase()+season.slice(1)} · ${period === 'current' ? 'Current Season' : 'All-Time (10yr)'}
+          </div>
+          <table class="perf-table">
+            <thead><tr>
+              <th>Event</th><th>#</th><th>Athlete</th><th>Grade</th><th>Year</th><th>Time</th><th></th>
+            </tr></thead>
+            <tbody>`;
+
+        Object.entries(byEvent).forEach(([event, entries]) => {
+          entries.forEach(r => {
+            html += `<tr>
+              <td class="event-col">${r.event}</td>
+              <td class="rank">${r.rank}</td>
+              <td class="athlete">${r.athlete}</td>
+              <td class="grade">${r.grade}</td>
+              <td class="year">${r.year}</td>
+              <td class="time">${r.time}</td>
+              <td><a href="${r.tfrrs_url}" target="_blank" class="tfrrs-link">TFRRS ↗</a></td>
+            </tr>`;
+          });
+        });
+
+        html += `</tbody></table></div>`;
+      });
+    });
+
+    if (school.tfrrs_url) {
+      html += `<div class="data-note">Data from <a href="${school.tfrrs_url}" target="_blank">TFRRS</a> · Sample data shown; use Refresh to load live data</div>`;
+    }
+    html += `</div>`;
+  });
+
+  return html || '<div style="color:var(--ink-faint);font-size:0.82rem;padding:12px 0;">No performance data for current filters.</div>';
+}
+
+function renderRecruitPanel(school) {
+  const rUrl = school.runcruit_url || `https://runcruit.com/standards/${school.id}`;
+
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:28px 16px;text-align:center;">
+      <div style="font-size:2rem;">🏃</div>
+      <div>
+        <div style="font-size:0.95rem;font-weight:600;color:var(--ink);margin-bottom:6px;">Recruiting Standards on Runcruit</div>
+        <div style="font-size:0.82rem;color:var(--ink-light);max-width:380px;line-height:1.5;">
+          Runcruit estimates recruit, walk-on, and tryout standards for ${school.name} 
+          based on historical performance data of current and recent athletes.
+        </div>
+      </div>
+      <a href="${rUrl}" target="_blank" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:var(--teal);color:white;
+        padding:10px 20px;border-radius:8px;
+        font-size:0.85rem;font-weight:600;
+        text-decoration:none;transition:background 0.15s;
+      " onmouseover="this.style.background='var(--teal-dark)'" 
+        onmouseout="this.style.background='var(--teal)'">
+        View ${school.name} Standards ↗
+      </a>
+      <div style="font-size:0.72rem;color:var(--ink-faint);font-style:italic;">
+        Opens runcruit.com — standards are estimates, not official school targets
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// CARD INTERACTIONS
+// ─────────────────────────────────────────────
+function toggleCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  card.classList.toggle('open');
+}
+
+function switchTab(schoolId, tabName, el) {
+  const card = document.getElementById(`card-${schoolId}`);
+  card.querySelectorAll('.card-tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.card-tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`tab-${tabName}-${schoolId}`).classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// REFRESH
+// ─────────────────────────────────────────────
+function refreshData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+  btn.querySelector('span') && (btn.querySelector('span').textContent = 'Refreshing…');
+
+  // Simulated refresh — in production this would fetch from TFRRS & Runcruit
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    lastUpdated = new Date();
+    alert(`Data refreshed! In the full version, this fetches live data from TFRRS and Runcruit.\n\nLast updated: ${lastUpdated.toLocaleTimeString()}`);
+  }, 2200);
+}
+
+// ─────────────────────────────────────────────
+// MOBILE SIDEBAR
+// ─────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('visible');
+}
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

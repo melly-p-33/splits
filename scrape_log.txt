@@ -1,0 +1,59 @@
+[20:50:01]   Women: 9 current marks across 9 events, 0 alltime
+[20:50:04]   Recruiting: 0 men's events, 0 women's events
+[20:50:04]   Women: 9 current marks across 9 events, 0 alltime
+[20:50:04]   Recruiting: 0 men's events, 0 women's events
+[20:50:05] [7/61] Scraping Trinity College...
+[20:50:06] [19/61] Scraping MIT...
+[20:50:06]   Men: 0 current marks across 0 events, 0 alltime
+[20:50:06]   Men: 9 current marks across 9 events, 0 alltime
+[20:50:07]   Women: 0 current marks across 0 events, 0 alltime
+[20:50:10]   Recruiting: 0 men's events, 0 women's events
+[20:50:11] [8/61] Scraping Wesleyan University...
+[20:50:21]   Men: 10 current marks across 10 events, 0 alltime
+[20:50:26]   Men: 9 current marks across 9 events, 0 alltime
+[20:50:28]   Women: 9 current marks across 9 events, 0 alltime
+[20:50:28]   Recruiting: 0 men's events, 0 women's events
+[20:50:29] [31/61] Scraping Johns Hopkins University...
+[20:50:35]   Women: 9 current marks across 9 events, 0 alltime
+[20:50:35]   Recruiting: 0 men's events, 0 women's events
+[20:50:36] [20/61] Scraping Springfield College...
+[20:50:42]   Women: 9 current marks across 9 events, 0 alltime
+[20:50:43]   Men: 10 current marks across 10 events, 0 alltime
+[20:50:45]   Recruiting: 0 men's events, 0 women's events
+[20:50:52]   Men: 9 current marks across 9 events, 0 alltime
+[20:51:08]   Women: 9 current marks across 9 events, 0 alltime
+[20:51:08]   Recruiting: 0 men's events, 0 women's events
+[20:51:09] [21/61] Scraping WPI...
+[20:51:25]   Men: 9 current marks across 9 events, 0 alltime
+[20:51:41]   Women: 9 current marks across 9 events, 0 alltime
+[20:51:41]   Recruiting: 0 men's events, 0 women's events
+[20:51:42] [22/61] Scraping Pomona-Pitzer...
+[20:51:43]   Men: 0 current marks across 0 events, 0 alltime
+[20:51:44]   Women: 0 current marks across 0 events, 0 alltime
+[20:51:44]   Recruiting: 0 men's events, 0 women's events
+[20:51:45] [23/61] Scraping Claremont-Mudd-Scripps...
+[20:51:46]   Men: 0 current marks across 0 events, 0 alltime
+[20:51:47]   Women: 0 current marks across 0 events, 0 alltime
+[20:51:49]   Recruiting: 0 men's events, 0 women's events
+[20:51:50] [24/61] Scraping University of Redlands...
+[20:52:06]   Men: 10 current marks across 10 events, 0 alltime
+[20:52:21]   Women: 10 current marks across 10 events, 0 alltime
+[20:52:24]   Recruiting: 0 men's events, 0 women's events
+[20:52:26] [25/61] Scraping Occidental College...
+[20:52:41]   Men: 9 current marks across 9 events, 0 alltime
+[20:52:55]   Women: 9 current marks across 9 events, 0 alltime
+[20:52:58]   Recruiting: 0 men's events, 0 women's events
+[20:53:00] [26/61] Scraping Cal Lutheran...
+[20:53:13]   Men: 9 current marks across 9 events, 0 alltime
+[20:53:28]   Women: 9 current marks across 9 events, 0 alltime
+[20:53:28]   Recruiting: 0 men's events, 0 women's events
+[20:53:30] [27/61] Scraping UW-La Crosse...
+[20:53:45]   Men: 9 current marks across 9 events, 0 alltime
+[20:54:02]   Women: 9 current marks across 9 events, 0 alltime
+[20:54:02]   Recruiting: 0 men's events, 0 women's events
+[20:54:03] [28/61] Scraping UW-Oshkosh...
+[20:54:20]   Men: 9 current marks across 9 events, 0 alltime
+[20:54:35]   Women: 9 current marks across 9 events, 0 alltime
+[20:54:35]   Recruiting: 0 men's events, 0 women's events
+[20:54:37] [29/61] Scraping UW-Whitewater...
+[20:54:51]   Men: 9 current marks across 9 events, 0 alltime
