@@ -120,21 +120,7 @@ header {
 }
 .pr-bar-btn:hover { background: var(--teal-dark); }
 
-.refresh-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: var(--font-display); font-size: 0.8rem;
-  color: var(--ink-mid); cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.refresh-btn:hover { border-color: var(--teal); color: var(--teal); }
-.refresh-btn.loading { opacity: 0.6; pointer-events: none; }
-.refresh-btn svg { transition: transform 0.4s; }
-.refresh-btn.loading svg { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+
 
 /* ── LAYOUT ── */
 .app-body {
@@ -539,10 +525,11 @@ main {
         <option>800m</option><option>1500m</option><option>Mile</option>
         <option>3000m</option><option>5000m</option><option>10000m</option>
         <option>4×100</option><option>4×400</option>
-        <option>Indoor 200m</option><option>Indoor 400m</option>
-        <option>Indoor 800m</option><option>Indoor Mile</option>
-        <option>Indoor 3000m</option><option>Indoor 5000m</option>
-        <option>Indoor 4×400</option>
+        <option disabled>── Indoor (coming soon) ──</option>
+        <option disabled>Indoor 200m</option><option disabled>Indoor 400m</option>
+        <option disabled>Indoor 800m</option><option disabled>Indoor Mile</option>
+        <option disabled>Indoor 3000m</option><option disabled>Indoor 5000m</option>
+        <option disabled>Indoor 4×400</option>
       </select>
       <input type="text" id="prTime" placeholder="e.g. 4:12.3" oninput="applyPR()">
       <button class="pr-bar-btn" onclick="clearPR()">Clear</button>
@@ -553,13 +540,7 @@ main {
     </button>
 
     <span id="lastUpdated" style="font-size:0.75rem;color:var(--ink-faint);"></span>
-    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline points="23 4 23 10 17 10"></polyline>
-        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-      </svg>
-      Refresh
-    </button>
+    <span id="lastUpdated" style="font-size:0.75rem;color:var(--ink-faint);"></span>
   </div>
 </header>
 
@@ -595,7 +576,7 @@ main {
     <div class="filter-pills">
       <div class="pill active" onclick="togglePill(this,'season','both')" data-group="season" data-val="both">Both</div>
       <div class="pill" onclick="togglePill(this,'season','outdoor')" data-group="season" data-val="outdoor">Outdoor</div>
-      <div class="pill" onclick="togglePill(this,'season','indoor')" data-group="season" data-val="indoor">Indoor</div>
+      <div class="pill" style="opacity:0.4;cursor:not-allowed;pointer-events:none;" title="Indoor coming soon">Indoor</div>
     </div>
   </div>
 
@@ -609,11 +590,11 @@ main {
         <option>5000m</option><option>10000m</option>
         <option>4×100</option><option>4×400</option>
       </optgroup>
-      <optgroup label="Indoor">
-        <option>Indoor 200m</option><option>Indoor 400m</option>
-        <option>Indoor 800m</option><option>Indoor Mile</option>
-        <option>Indoor 3000m</option><option>Indoor 5000m</option>
-        <option>Indoor 4×400</option>
+      <optgroup label="Indoor (coming soon)" style="color:var(--ink-faint);">
+        <option disabled>Indoor 200m</option><option disabled>Indoor 400m</option>
+        <option disabled>Indoor 800m</option><option disabled>Indoor Mile</option>
+        <option disabled>Indoor 3000m</option><option disabled>Indoor 5000m</option>
+        <option disabled>Indoor 4×400</option>
       </optgroup>
     </select>
   </div>
@@ -624,6 +605,33 @@ main {
   </div>
 
   <button class="clear-filters" onclick="clearAllFilters()">Clear all filters</button>
+
+  <div style="margin-top:auto;padding-top:24px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--ink-faint);line-height:1.6;">
+    
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">PR Match Thresholds</div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--recruit);flex-shrink:0;"></span>
+        <span><strong style="color:var(--ink-mid);">Recruit</strong> — within 1% of team's best</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--walkon);flex-shrink:0;"></span>
+        <span><strong style="color:var(--ink-mid);">Walk-on</strong> — within 3% of team's best</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--tryout);flex-shrink:0;"></span>
+        <span><strong style="color:var(--ink-mid);">Tryout</strong> — within 6% of team's best</span>
+      </div>
+    </div>
+
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;">About</div>
+    <div style="margin-bottom:4px;">Performance data from <a href="https://www.tfrrs.org" target="_blank" style="color:var(--teal);text-decoration:none;">TFRRS</a> — top mark per event, current outdoor season.</div>
+    <div style="margin-bottom:8px;">PR thresholds compare your time against each team's fastest current-season mark.</div>
+    <div style="padding:10px 12px;background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:8px;">
+      Looking for recruiting standards? Visit <a href="https://runcruit.com" target="_blank" style="color:var(--teal-dark);font-weight:600;text-decoration:none;">Runcruit ↗</a> to see estimated recruit, walk-on, and tryout times by school.
+    </div>
+
+  </div>
 
 </aside>
 
@@ -983,9 +991,8 @@ async function loadData() {
     if (data.meta?.last_updated) {
       const d = new Date(data.meta.last_updated);
       document.title = `Splits · ${data.meta.school_count || schools.length} schools`;
-      // Show last updated
       const lu = document.getElementById('lastUpdated');
-      if (lu) lu.textContent = 'Updated ' + d.toLocaleDateString();
+      if (lu) lu.textContent = `Data from ${d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}`;
     }
     renderSchools();
     updateCount();
@@ -1158,6 +1165,11 @@ function renderSchools(list) {
 function renderSchoolCard(school) {
   const divBadge = { D1:'badge-div1', D2:'badge-div2', D3:'badge-div3', NAIA:'badge-naia' }[school.division] || '';
 
+  // Check if school has any performance data at all
+  const menPerfs = school.performances?.men?.outdoor?.current || [];
+  const womenPerfs = school.performances?.women?.outdoor?.current || [];
+  const hasNoData = menPerfs.length === 0 && womenPerfs.length === 0;
+
   let matchClass = '';
   let matchBadge = '';
   if (prMatch.event && prMatch.time) {
@@ -1176,20 +1188,14 @@ function renderSchoolCard(school) {
       </div>
       <div class="card-badges">
         ${matchBadge}
+        ${hasNoData ? '<span style="font-size:0.68rem;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:2px 7px;font-weight:500;">⚠ no data</span>' : ''}
         <span class="badge ${divBadge}">${school.division}</span>
         <span class="expand-icon">▾</span>
       </div>
     </div>
     <div class="card-body" id="body-${school.id}">
-      <div class="card-tabs">
-        <div class="card-tab active" onclick="switchTab('${school.id}','perf',this)">Performances</div>
-        <div class="card-tab" onclick="switchTab('${school.id}','recruit',this)">Recruiting Standards</div>
-      </div>
       <div class="card-tab-panel active" id="tab-perf-${school.id}">
         ${renderPerfPanel(school)}
-      </div>
-      <div class="card-tab-panel" id="tab-recruit-${school.id}">
-        ${renderRecruitPanel(school)}
       </div>
     </div>
   </div>`;
@@ -1258,7 +1264,7 @@ function renderPerfPanel(school) {
 }
 
 function renderRecruitPanel(school) {
-  const rUrl = school.runcruit_url || `https://runcruit.com/standards/${school.id}`;
+  const rUrl = `https://runcruit.com`;
 
   return `
     <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:28px 16px;text-align:center;">
@@ -1278,10 +1284,10 @@ function renderRecruitPanel(school) {
         text-decoration:none;transition:background 0.15s;
       " onmouseover="this.style.background='var(--teal-dark)'" 
         onmouseout="this.style.background='var(--teal)'">
-        View ${school.name} Standards ↗
+        Find Recruiting Standards on Runcruit ↗
       </a>
       <div style="font-size:0.72rem;color:var(--ink-faint);font-style:italic;">
-        Opens runcruit.com — standards are estimates, not official school targets
+        Opens runcruit.com — search for your school to view recruiting standards
       </div>
     </div>`;
 }
@@ -1302,21 +1308,7 @@ function switchTab(schoolId, tabName, el) {
   document.getElementById(`tab-${tabName}-${schoolId}`).classList.add('active');
 }
 
-// ─────────────────────────────────────────────
-// REFRESH
-// ─────────────────────────────────────────────
-function refreshData() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('loading');
-  btn.querySelector('span') && (btn.querySelector('span').textContent = 'Refreshing…');
 
-  // Simulated refresh — in production this would fetch from TFRRS & Runcruit
-  setTimeout(() => {
-    btn.classList.remove('loading');
-    lastUpdated = new Date();
-    alert(`Data refreshed! In the full version, this fetches live data from TFRRS and Runcruit.\n\nLast updated: ${lastUpdated.toLocaleTimeString()}`);
-  }, 2200);
-}
 
 // ─────────────────────────────────────────────
 // MOBILE SIDEBAR
