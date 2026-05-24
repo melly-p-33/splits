@@ -1127,11 +1127,6 @@ function getMatchTier(school, gender, event, timeStr) {
   // For running, lower time = faster = better
   const pctSlower = (prTime - topTime) / topTime;
 
-  // Debug — remove after testing
-  if (school.name === 'Shippensburg' || school.name === 'Albion College') {
-    console.log(school.name, event, 'topTime:', topTime, 'prTime:', prTime, 'pct:', pctSlower, 'rawTimes:', eventPerfs.map(p=>p.time));
-  }
-
   if (pctSlower <= 0.01) return 'recruit';
   if (pctSlower <= 0.03) return 'walkon';
   if (pctSlower <= 0.06) return 'tryout';
@@ -1167,6 +1162,43 @@ function renderSchools(list) {
   grid.innerHTML = toRender.map(s => renderSchoolCard(s)).join('');
 }
 
+function buildInlineRows(school) {
+  // Only show inline rows when event filter is active
+  const event = filters.event;
+  if (!event) return '';
+
+  const genders = filters.gender === 'both' ? ['men','women'] : [filters.gender];
+  const rows = [];
+
+  genders.forEach(gender => {
+    const perfs = school.performances?.[gender]?.outdoor?.current || [];
+    const match = perfs.find(p => p.event === event);
+    if (!match) return;
+
+    const genderLabel = filters.gender === 'both'
+      ? `<span style="font-size:0.7rem;color:var(--ink-faint);font-family:var(--font-mono);margin-right:4px;">${gender === 'men' ? 'M' : 'W'}</span>`
+      : '';
+
+    const prSec = prMatch.event === event && prMatch.gender === gender && prMatch.time;
+    const tier = prSec ? getMatchTier(school, gender, event, prMatch.time) : null;
+    const tierDot = tier
+      ? `<span style="width:7px;height:7px;border-radius:50%;background:var(--${tier});display:inline-block;margin-left:4px;flex-shrink:0;"></span>`
+      : '';
+
+    rows.push(`
+      <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;">
+        ${genderLabel}
+        <span style="font-family:var(--font-mono);font-size:0.85rem;font-weight:500;color:var(--ink);">${match.time}</span>
+        <span style="font-size:0.78rem;color:var(--ink-mid);">${match.athlete}</span>
+        <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);">${match.grade || ''}</span>
+        <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);">${match.year || ''}</span>
+        ${tierDot}
+      </div>`);
+  });
+
+  return rows.join('');
+}
+
 function renderSchoolCard(school) {
   const divBadge = { D1:'badge-div1', D2:'badge-div2', D3:'badge-div3', NAIA:'badge-naia' }[school.division] || '';
 
@@ -1185,15 +1217,21 @@ function renderSchoolCard(school) {
     }
   }
 
+  // Build inline preview rows for card face
+  const inlineRows = buildInlineRows(school);
+
   return `<div class="school-card ${matchClass}" id="card-${school.id}">
     <div class="card-header" onclick="toggleCard('${school.id}')">
-      <div>
-        <div class="school-name">${school.name}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+          <div class="school-name">${school.name}</div>
+          ${hasNoData ? '<span style="font-size:0.68rem;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:2px 7px;font-weight:500;">⚠ no data</span>' : ''}
+        </div>
         <div class="school-meta">${school.conference || ''} · ${school.state || ''}</div>
+        ${inlineRows}
       </div>
       <div class="card-badges">
         ${matchBadge}
-        ${hasNoData ? '<span style="font-size:0.68rem;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:2px 7px;font-weight:500;">⚠ no data</span>' : ''}
         <span class="badge ${divBadge}">${school.division}</span>
         <span class="expand-icon">▾</span>
       </div>
