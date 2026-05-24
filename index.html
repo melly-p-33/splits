@@ -639,7 +639,6 @@ main {
     </button>
 
     <span id="lastUpdated" style="font-size:0.75rem;color:var(--ink-faint);"></span>
-    <span id="lastUpdated" style="font-size:0.75rem;color:var(--ink-faint);"></span>
   </div>
 </header>
 
@@ -685,13 +684,13 @@ main {
 
   <div class="filter-group">
     <div class="filter-label">Division</div>
-    <div class="filter-pills">
-      <div class="pill active" onclick="togglePill(this,'division','all')" data-group="division" data-val="all">All</div>
-      <div class="pill" onclick="togglePill(this,'division','D1')" data-group="division" data-val="D1">D1</div>
-      <div class="pill" onclick="togglePill(this,'division','D2')" data-group="division" data-val="D2">D2</div>
-      <div class="pill" onclick="togglePill(this,'division','D3')" data-group="division" data-val="D3">D3</div>
-      <div class="pill" onclick="togglePill(this,'division','NAIA')" data-group="division" data-val="NAIA">NAIA</div>
-      <div class="pill" onclick="togglePill(this,'division','favorites')" data-group="division" data-val="favorites" style="display:flex;align-items:center;padding:4px 10px;">
+    <div class="filter-pills" style="flex-wrap:wrap;">
+      <div class="pill active" id="div-all" onclick="toggleDivision('all')" data-div="all">All</div>
+      <div class="pill" id="div-D1" onclick="toggleDivision('D1')" data-div="D1">D1</div>
+      <div class="pill" id="div-D2" onclick="toggleDivision('D2')" data-div="D2">D2</div>
+      <div class="pill" id="div-D3" onclick="toggleDivision('D3')" data-div="D3">D3</div>
+      <div class="pill" id="div-NAIA" onclick="toggleDivision('NAIA')" data-div="NAIA">NAIA</div>
+      <div class="pill" id="div-favorites" onclick="toggleDivision('favorites')" data-div="favorites" style="display:flex;align-items:center;padding:4px 10px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
       </div>
     </div>
@@ -799,6 +798,7 @@ main {
 <main>
   <div class="results-header" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
     <span class="results-count" id="resultsCount"></span>
+    <span id="lastUpdated" style="font-size:0.72rem;color:var(--ink-faint);font-style:italic;"></span>
     <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
       <span style="font-size:0.75rem;color:var(--ink-faint);">Sort by</span>
       <div style="display:flex;gap:4px;">
@@ -1113,6 +1113,7 @@ const SAMPLE_SCHOOLS = [
 // ─────────────────────────────────────────────
 let schools = [];
 let currentSort = 'alpha';
+let selectedDivisions = new Set(); // empty = All
 let selectedStates = new Set();
 let favorites = new Set(JSON.parse(localStorage.getItem('splits_favorites') || '[]'));
 let filters = { gender: 'both', division: 'all', season: 'both', event: '', conferences: new Set() };
@@ -1290,6 +1291,44 @@ function togglePill(el, group, val) {
   filterSchools();
 }
 
+function toggleDivision(val) {
+  const allBtn = document.getElementById('div-all');
+  const favBtn = document.getElementById('div-favorites');
+
+  if (val === 'all') {
+    // All clears everything
+    selectedDivisions.clear();
+    filters.division = 'all';
+    document.querySelectorAll('[data-div]').forEach(p => p.classList.remove('active'));
+    allBtn.classList.add('active');
+  } else if (val === 'favorites') {
+    // Favorites is exclusive
+    selectedDivisions.clear();
+    filters.division = 'favorites';
+    document.querySelectorAll('[data-div]').forEach(p => p.classList.remove('active'));
+    favBtn.classList.add('active');
+  } else {
+    // Toggle this division
+    allBtn.classList.remove('active');
+    favBtn.classList.remove('active');
+    if (selectedDivisions.has(val)) {
+      selectedDivisions.delete(val);
+      document.getElementById('div-' + val).classList.remove('active');
+    } else {
+      selectedDivisions.add(val);
+      document.getElementById('div-' + val).classList.add('active');
+    }
+    // If nothing selected, go back to All
+    if (selectedDivisions.size === 0) {
+      filters.division = 'all';
+      allBtn.classList.add('active');
+    } else {
+      filters.division = 'multi';
+    }
+  }
+  filterSchools();
+}
+
 function toggleConference(conf, checked) {
   if (checked) filters.conferences.add(conf);
   else filters.conferences.delete(conf);
@@ -1318,8 +1357,10 @@ function clearAllFilters() {
   filters = { gender: 'both', division: 'all', season: 'both', event: '', conferences: new Set() };
   document.querySelectorAll('.pill[data-group="gender"]').forEach(p => p.classList.remove('active'));
   document.querySelector('.pill[data-val="both"][data-group="gender"]').classList.add('active');
-  document.querySelectorAll('.pill[data-group="division"]').forEach(p => p.classList.remove('active'));
-  document.querySelector('.pill[data-val="all"]').classList.add('active');
+  selectedDivisions.clear();
+  filters.division = 'all';
+  document.querySelectorAll('[data-div]').forEach(p => p.classList.remove('active'));
+  document.getElementById('div-all').classList.add('active');
   document.querySelectorAll('.pill[data-group="season"]').forEach(p => p.classList.remove('active'));
   document.querySelector('.pill[data-val="both"][data-group="season"]').classList.add('active');
   selectedEvents.clear();
@@ -1347,6 +1388,7 @@ function filterSchools() {
   const visible = schools.filter(s => {
     if (search && !s.name.toLowerCase().includes(search) && !(s.conference||'').toLowerCase().includes(search)) return false;
     if (filters.division === 'favorites') { if (!favorites.has(s.id)) return false; }
+    else if (filters.division === 'multi') { if (!selectedDivisions.has(s.division)) return false; }
     else if (filters.division !== 'all' && s.division !== filters.division) return false;
     if (filters.conferences.size > 0 && !filters.conferences.has(s.conference)) return false;
     if (selectedStates.size > 0 && !selectedStates.has(s.state)) return false;
@@ -1369,6 +1411,13 @@ function updateCount(n) {
 // ─────────────────────────────────────────────
 // PR MATCHING
 // ─────────────────────────────────────────────
+function secondsToTime(secs) {
+  if (!secs || !isFinite(secs)) return '';
+  const mins = Math.floor(secs / 60);
+  const s = (secs % 60).toFixed(2).padStart(5, '0');
+  return mins > 0 ? `${mins}:${s}` : `${s}`;
+}
+
 function parseTime(str) {
   if (!str) return null;
   str = str.trim().replace(',', '.');
@@ -1433,7 +1482,30 @@ function getMatchTier(school, gender, event, timeStr) {
   if (!prTime) return null;
 
   const perfs = school.performances?.[gender]?.outdoor?.current || [];
-  const eventPerfs = perfs.filter(p => p.event === event);
+  let eventPerfs = perfs.filter(p => p.event === event);
+
+  // Silent cross-reference: Mile ↔ 1500m conversion (factor: 0.9369)
+  if (eventPerfs.length === 0) {
+    if (event === 'Mile') {
+      const alt = perfs.filter(p => p.event === '1500m');
+      if (alt.length > 0) {
+        // Convert 1500m times to Mile equivalent (divide by 0.9369)
+        eventPerfs = alt.map(p => ({
+          ...p,
+          time: secondsToTime(parseTime(p.time) / 0.9369)
+        }));
+      }
+    } else if (event === '1500m') {
+      const alt = perfs.filter(p => p.event === 'Mile');
+      if (alt.length > 0) {
+        // Convert Mile times to 1500m equivalent (multiply by 0.9369)
+        eventPerfs = alt.map(p => ({
+          ...p,
+          time: secondsToTime(parseTime(p.time) * 0.9369)
+        }));
+      }
+    }
+  }
   if (eventPerfs.length === 0) return null;
 
   // Get the top (fastest) time for this event
