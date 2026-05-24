@@ -20,7 +20,7 @@
   --border-light: #f3f4f6;
   --bg: #fafafa;
   --white: #ffffff;
-  --recruit: #0d9e8a;
+  --recruit: #4caf27;
   --walkon: #f59e0b;
   --tryout: #94a3b8;
   --red: #ef4444;
@@ -168,6 +168,7 @@ aside {
   background: var(--teal); border-color: var(--teal);
   color: white; font-weight: 500;
 }
+.pill.active svg { fill: white; stroke: white; }
 
 .filter-checkboxes { display: flex; flex-direction: column; gap: 6px; }
 .filter-check {
@@ -460,6 +461,102 @@ main {
 .data-note a { color: var(--teal); text-decoration: none; }
 .data-note a:hover { text-decoration: underline; }
 
+/* ── DROPDOWN FILTER PANELS ── */
+.filter-dropdown { position: relative; }
+.filter-dropdown-btn {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font-display); font-size: 0.82rem;
+  color: var(--ink); background: var(--white);
+  outline: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: border-color 0.15s;
+  user-select: none;
+}
+.filter-dropdown-btn:hover { border-color: var(--teal); }
+.filter-dropdown-btn.active { border-color: var(--teal); color: var(--teal); }
+.filter-dropdown-btn .chevron {
+  transition: transform 0.2s;
+  font-size: 0.65rem; color: var(--ink-faint);
+}
+.filter-dropdown-btn.open .chevron { transform: rotate(180deg); }
+.filter-dropdown-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.filter-dropdown-panel.open { display: block; }
+.filter-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem; color: var(--ink-mid);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.filter-dropdown-item:hover { background: var(--border-light); }
+.filter-dropdown-item input[type=checkbox] { accent-color: var(--teal); cursor: pointer; }
+.filter-dropdown-item.checked { color: var(--teal); font-weight: 500; }
+
+/* ── FAVORITES ── */
+.fav-btn {
+  background: none; border: none; cursor: pointer;
+  line-height: 1; padding: 2px 4px; flex-shrink: 0;
+  transition: transform 0.15s;
+  color: var(--border);
+}
+.fav-btn:hover { transform: scale(1.15); color: #e91e8c; }
+.fav-btn.favorited { color: #e91e8c; }
+.fav-btn svg { display: block; }
+
+/* ── SORT BUTTONS ── */
+.sort-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.75rem; font-weight: 500;
+  cursor: pointer; font-family: var(--font-display);
+  background: var(--white); color: var(--ink-mid);
+  transition: all 0.12s;
+}
+.sort-btn:hover { border-color: var(--teal); color: var(--teal); }
+.sort-btn.active { background: var(--teal); border-color: var(--teal); color: white; }
+
+/* ── MOBILE ── */
+/* ── FAVORITES ── */
+.fav-btn {
+  background: none; border: none; cursor: pointer;
+  line-height: 1; padding: 2px 4px; flex-shrink: 0;
+  transition: transform 0.15s;
+  color: var(--border);
+}
+.fav-btn:hover { transform: scale(1.15); color: #e91e8c; }
+.fav-btn.favorited { color: #e91e8c; }
+.fav-btn svg { display: block; }
+
+/* ── SORT BUTTONS ── */
+.sort-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.75rem; font-weight: 500;
+  cursor: pointer; font-family: var(--font-display);
+  background: var(--white); color: var(--ink-mid);
+  transition: all 0.12s;
+}
+.sort-btn:hover { border-color: var(--teal); color: var(--teal); }
+.sort-btn.active { background: var(--teal); border-color: var(--teal); color: white; }
+
 /* ── MOBILE ── */
 @media (max-width: 768px) {
   :root { --sidebar-w: 0px; }
@@ -474,6 +571,7 @@ main {
   aside.open { left: 0; }
   main { margin-left: 0; padding: 16px; }
   .pr-bar { display: none; }
+  .pr-bar-mobile { display: flex !important; }
   .mobile-filter-btn {
     display: flex; align-items: center; gap: 6px;
     padding: 7px 12px;
@@ -484,6 +582,7 @@ main {
 }
 @media (min-width: 769px) {
   .mobile-filter-btn { display: none; }
+  .pr-bar-mobile { display: none !important; }
 }
 
 .overlay {
@@ -551,6 +650,30 @@ main {
 <!-- SIDEBAR -->
 <aside id="sidebar">
 
+  <!-- PR Matcher — mobile only, shown inside sidebar -->
+  <div class="pr-bar-mobile" style="display:none;flex-direction:column;gap:8px;padding:12px;background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:8px;margin-bottom:16px;">
+    <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--teal-dark);">My PR</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <select id="prGenderMobile" onchange="syncPRMobile()" style="border:1px solid var(--teal-mid);background:white;border-radius:6px;padding:5px 8px;font-size:0.8rem;font-family:var(--font-display);color:var(--ink);flex:1;min-width:70px;">
+        <option value="men">Men</option>
+        <option value="women">Women</option>
+      </select>
+      <select id="prEventMobile" onchange="syncPRMobile()" style="border:1px solid var(--teal-mid);background:white;border-radius:6px;padding:5px 8px;font-size:0.8rem;font-family:var(--font-display);color:var(--ink);flex:2;min-width:100px;">
+        <option value="">Event</option>
+        <option>100m</option><option>200m</option><option>400m</option>
+        <option>800m</option><option>1500m</option><option>Mile</option>
+        <option>5000m</option><option>10000m</option>
+        <option>4×100</option><option>4×400</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <input type="text" id="prTimeMobile" placeholder="e.g. 4:12.3" oninput="syncPRMobile()"
+        style="border:1px solid var(--teal-mid);background:white;border-radius:6px;padding:5px 8px;font-size:0.82rem;font-family:var(--font-mono);color:var(--ink);flex:1;outline:none;">
+      <button onclick="clearPRMobile()" style="background:var(--teal);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-weight:500;cursor:pointer;font-family:var(--font-display);">Clear</button>
+    </div>
+    <div id="prBannerMobile" style="font-size:0.75rem;color:var(--teal-dark);display:none;"></div>
+  </div>
+
   <div class="filter-group">
     <div class="filter-label">Gender</div>
     <div class="filter-pills">
@@ -568,6 +691,9 @@ main {
       <div class="pill" onclick="togglePill(this,'division','D2')" data-group="division" data-val="D2">D2</div>
       <div class="pill" onclick="togglePill(this,'division','D3')" data-group="division" data-val="D3">D3</div>
       <div class="pill" onclick="togglePill(this,'division','NAIA')" data-group="division" data-val="NAIA">NAIA</div>
+      <div class="pill" onclick="togglePill(this,'division','favorites')" data-group="division" data-val="favorites" style="display:flex;align-items:center;padding:4px 10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      </div>
     </div>
   </div>
 
@@ -582,26 +708,60 @@ main {
 
   <div class="filter-group">
     <div class="filter-label">Event</div>
-    <select class="event-select" id="eventFilter" onchange="filterSchools()">
-      <option value="">All running events</option>
-      <optgroup label="Outdoor">
-        <option>100m</option><option>200m</option><option>400m</option>
-        <option>800m</option><option>1500m</option><option>Mile</option>
-        <option>5000m</option><option>10000m</option>
-        <option>4×100</option><option>4×400</option>
-      </optgroup>
-      <optgroup label="Indoor (coming soon)" style="color:var(--ink-faint);">
-        <option disabled>Indoor 200m</option><option disabled>Indoor 400m</option>
-        <option disabled>Indoor 800m</option><option disabled>Indoor Mile</option>
-        <option disabled>Indoor 3000m</option><option disabled>Indoor 5000m</option>
-        <option disabled>Indoor 4×400</option>
-      </optgroup>
-    </select>
+    <div class="filter-dropdown" id="eventDropdown">
+      <div class="filter-dropdown-btn" id="eventDropdownBtn" onclick="toggleDropdown('event')">
+        <span id="eventDropdownLabel">All running events</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="filter-dropdown-panel" id="eventDropdownPanel">
+        <label class="filter-dropdown-item" onclick="toggleEventFilter('', this)">
+          <input type="checkbox" id="eventAll" checked> All running events
+        </label>
+        <div style="padding:4px 12px;font-size:0.7rem;font-weight:600;letter-spacing:0.05em;color:var(--ink-faint);text-transform:uppercase;">Outdoor</div>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="100m" onchange="updateEventFilter()"> 100m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="200m" onchange="updateEventFilter()"> 200m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="400m" onchange="updateEventFilter()"> 400m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="800m" onchange="updateEventFilter()"> 800m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="1500m" onchange="updateEventFilter()"> 1500m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="Mile" onchange="updateEventFilter()"> Mile</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="5000m" onchange="updateEventFilter()"> 5000m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="10000m" onchange="updateEventFilter()"> 10000m</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="4x100m Relay" onchange="updateEventFilter()"> 4×100</label>
+        <label class="filter-dropdown-item"><input type="checkbox" class="event-cb" value="4x400m Relay" onchange="updateEventFilter()"> 4×400</label>
+        <div style="padding:4px 12px;font-size:0.7rem;font-weight:600;letter-spacing:0.05em;color:var(--ink-faint);text-transform:uppercase;opacity:0.5;">Indoor (coming soon)</div>
+        <label class="filter-dropdown-item" style="opacity:0.4;pointer-events:none;"><input type="checkbox" disabled> Indoor 200m</label>
+        <label class="filter-dropdown-item" style="opacity:0.4;pointer-events:none;"><input type="checkbox" disabled> Indoor 400m</label>
+        <label class="filter-dropdown-item" style="opacity:0.4;pointer-events:none;"><input type="checkbox" disabled> Indoor 800m</label>
+        <label class="filter-dropdown-item" style="opacity:0.4;pointer-events:none;"><input type="checkbox" disabled> Indoor Mile</label>
+        <label class="filter-dropdown-item" style="opacity:0.4;pointer-events:none;"><input type="checkbox" disabled> Indoor 5000m</label>
+      </div>
+    </div>
   </div>
 
   <div class="filter-group">
     <div class="filter-label">Conference</div>
-    <div class="conference-list" id="conferenceList"></div>
+    <div class="filter-dropdown" id="confDropdown">
+      <div class="filter-dropdown-btn" id="confDropdownBtn" onclick="toggleDropdown('conf')">
+        <span id="confDropdownLabel">All conferences</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="filter-dropdown-panel" id="confDropdownPanel">
+        <div id="conferenceList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-label">State</div>
+    <div class="filter-dropdown" id="stateDropdown">
+      <div class="filter-dropdown-btn" id="stateDropdownBtn" onclick="toggleDropdown('state')">
+        <span id="stateDropdownLabel">All states</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="filter-dropdown-panel" id="stateDropdownPanel">
+        <div id="stateList"></div>
+      </div>
+    </div>
   </div>
 
   <button class="clear-filters" onclick="clearAllFilters()">Clear all filters</button>
@@ -637,8 +797,15 @@ main {
 
 <!-- MAIN -->
 <main>
-  <div class="results-header">
+  <div class="results-header" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
     <span class="results-count" id="resultsCount"></span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.75rem;color:var(--ink-faint);">Sort by</span>
+      <div style="display:flex;gap:4px;">
+        <button class="sort-btn active" id="sort-alpha" onclick="setSort('alpha',this)">A–Z</button>
+        <button class="sort-btn" id="sort-fastest" onclick="setSort('fastest',this)">Fastest</button>
+      </div>
+    </div>
   </div>
 
   <div class="pr-match-banner" id="prBanner">
@@ -945,6 +1112,9 @@ const SAMPLE_SCHOOLS = [
 // STATE
 // ─────────────────────────────────────────────
 let schools = [];
+let currentSort = 'alpha';
+let selectedStates = new Set();
+let favorites = new Set(JSON.parse(localStorage.getItem('splits_favorites') || '[]'));
 let filters = { gender: 'both', division: 'all', season: 'both', event: '', conferences: new Set() };
 let prMatch = { gender: '', event: '', time: '' };
 let lastUpdated = null;
@@ -1008,11 +1178,45 @@ async function loadData() {
   }
 }
 
+function buildStateList() {
+  const list = document.getElementById('stateList');
+  list.innerHTML = '';
+  const statesInData = [...new Set(schools.map(s => s.state).filter(Boolean))].sort();
+  statesInData.forEach(state => {
+    const item = document.createElement('label');
+    item.className = 'filter-dropdown-item';
+    item.innerHTML = `<input type="checkbox" value="${state}" onchange="toggleState('${state}',this.checked)"> ${state}`;
+    list.appendChild(item);
+  });
+}
+
+function toggleState(state, checked) {
+  if (checked) selectedStates.add(state);
+  else selectedStates.delete(state);
+  const btn = document.getElementById('stateDropdownBtn');
+  const label = document.getElementById('stateDropdownLabel');
+  if (selectedStates.size === 0) {
+    label.textContent = 'All states';
+    btn.classList.remove('active');
+  } else if (selectedStates.size === 1) {
+    label.textContent = [...selectedStates][0];
+    btn.classList.add('active');
+  } else {
+    label.textContent = `${selectedStates.size} states`;
+    btn.classList.add('active');
+  }
+  filterSchools();
+}
+
 function buildConferenceList() {
   const list = document.getElementById('conferenceList');
-  CONFERENCES.forEach(conf => {
+  // Build from actual data if available, otherwise use hardcoded list
+  const confsInData = schools.length > 0
+    ? [...new Set(schools.map(s => s.conference).filter(Boolean))].sort()
+    : CONFERENCES;
+  confsInData.forEach(conf => {
     const item = document.createElement('label');
-    item.className = 'conf-item';
+    item.className = 'filter-dropdown-item';
     item.innerHTML = `<input type="checkbox" value="${conf}" onchange="toggleConference('${conf}',this.checked)"> ${conf}`;
     list.appendChild(item);
   });
@@ -1021,6 +1225,64 @@ function buildConferenceList() {
 // ─────────────────────────────────────────────
 // FILTERS
 // ─────────────────────────────────────────────
+// ── DROPDOWN TOGGLE ──
+function toggleDropdown(which) {
+  const btn  = document.getElementById(which + 'DropdownBtn');
+  const panel = document.getElementById(which + 'DropdownPanel');
+  const isOpen = panel.classList.contains('open');
+  // Close all dropdowns first
+  document.querySelectorAll('.filter-dropdown-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.filter-dropdown-btn').forEach(b => b.classList.remove('open'));
+  if (!isOpen) {
+    panel.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.filter-dropdown')) {
+    document.querySelectorAll('.filter-dropdown-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.filter-dropdown-btn').forEach(b => b.classList.remove('open'));
+  }
+});
+
+// ── MULTI-EVENT FILTER ──
+let selectedEvents = new Set();
+
+function toggleEventFilter(val, el) {
+  // Clicking "All" clears all others
+  selectedEvents.clear();
+  document.querySelectorAll('.event-cb').forEach(cb => cb.checked = false);
+  document.getElementById('eventAll').checked = true;
+  updateEventLabel();
+  filterSchools();
+}
+
+function updateEventFilter() {
+  const checked = [...document.querySelectorAll('.event-cb:checked')].map(cb => cb.value);
+  selectedEvents = new Set(checked);
+  // Uncheck "All" if any specific event selected
+  document.getElementById('eventAll').checked = selectedEvents.size === 0;
+  updateEventLabel();
+  filterSchools();
+}
+
+function updateEventLabel() {
+  const label = document.getElementById('eventDropdownLabel');
+  const btn   = document.getElementById('eventDropdownBtn');
+  if (selectedEvents.size === 0) {
+    label.textContent = 'All running events';
+    btn.classList.remove('active');
+  } else if (selectedEvents.size === 1) {
+    label.textContent = [...selectedEvents][0];
+    btn.classList.add('active');
+  } else {
+    label.textContent = `${selectedEvents.size} events selected`;
+    btn.classList.add('active');
+  }
+}
+
 function togglePill(el, group, val) {
   document.querySelectorAll(`.pill[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
   el.classList.add('active');
@@ -1031,11 +1293,24 @@ function togglePill(el, group, val) {
 function toggleConference(conf, checked) {
   if (checked) filters.conferences.add(conf);
   else filters.conferences.delete(conf);
-  document.querySelectorAll('.conf-item').forEach(item => {
+  document.querySelectorAll('#conferenceList .filter-dropdown-item').forEach(item => {
     const cb = item.querySelector('input');
-    if (cb && filters.conferences.has(cb.value)) item.classList.add('active');
-    else item.classList.remove('active');
+    if (cb && filters.conferences.has(cb.value)) item.classList.add('checked');
+    else item.classList.remove('checked');
   });
+  // Update conf button label
+  const confBtn = document.getElementById('confDropdownBtn');
+  const confLabel = document.getElementById('confDropdownLabel');
+  if (filters.conferences.size === 0) {
+    confLabel.textContent = 'All conferences';
+    confBtn.classList.remove('active');
+  } else if (filters.conferences.size === 1) {
+    confLabel.textContent = [...filters.conferences][0];
+    confBtn.classList.add('active');
+  } else {
+    confLabel.textContent = `${filters.conferences.size} conferences`;
+    confBtn.classList.add('active');
+  }
   filterSchools();
 }
 
@@ -1047,20 +1322,39 @@ function clearAllFilters() {
   document.querySelector('.pill[data-val="all"]').classList.add('active');
   document.querySelectorAll('.pill[data-group="season"]').forEach(p => p.classList.remove('active'));
   document.querySelector('.pill[data-val="both"][data-group="season"]').classList.add('active');
-  document.getElementById('eventFilter').value = '';
-  document.querySelectorAll('.conf-item input').forEach(cb => { cb.checked = false; });
-  document.querySelectorAll('.conf-item').forEach(i => i.classList.remove('active'));
+  selectedEvents.clear();
+  document.querySelectorAll('.event-cb').forEach(cb => cb.checked = false);
+  document.getElementById('eventAll').checked = true;
+  updateEventLabel();
+  document.querySelectorAll('#conferenceList input').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('#conferenceList .filter-dropdown-item').forEach(i => i.classList.remove('checked'));
+  document.getElementById('confDropdownLabel').textContent = 'All conferences';
+  document.getElementById('confDropdownBtn').classList.remove('active');
   document.getElementById('schoolSearch').value = '';
+  selectedStates.clear();
+  document.querySelectorAll('#stateList input').forEach(cb => cb.checked = false);
+  document.getElementById('stateDropdownLabel').textContent = 'All states';
+  document.getElementById('stateDropdownBtn').classList.remove('active');
   filterSchools();
 }
 
 function filterSchools() {
-  filters.event = document.getElementById('eventFilter').value;
+  // Use multi-select events
+  filters.events = selectedEvents;
+  filters.event = selectedEvents.size === 1 ? [...selectedEvents][0] : (selectedEvents.size === 0 ? '' : [...selectedEvents][0]);
   const search = document.getElementById('schoolSearch').value.toLowerCase();
+  const hideNoData = document.getElementById('hideNoData')?.checked;
   const visible = schools.filter(s => {
     if (search && !s.name.toLowerCase().includes(search) && !(s.conference||'').toLowerCase().includes(search)) return false;
-    if (filters.division !== 'all' && s.division !== filters.division) return false;
+    if (filters.division === 'favorites') { if (!favorites.has(s.id)) return false; }
+    else if (filters.division !== 'all' && s.division !== filters.division) return false;
     if (filters.conferences.size > 0 && !filters.conferences.has(s.conference)) return false;
+    if (selectedStates.size > 0 && !selectedStates.has(s.state)) return false;
+    if (hideNoData) {
+      const hasMen = (s.performances?.men?.outdoor?.current || []).length > 0;
+      const hasWomen = (s.performances?.women?.outdoor?.current || []).length > 0;
+      if (!hasMen && !hasWomen) return false;
+    }
     return true;
   });
   renderSchools(visible);
@@ -1106,6 +1400,30 @@ function clearPR() {
   document.querySelectorAll('.school-card').forEach(c => c.classList.remove('match-recruit','match-walkon','match-tryout'));
 }
 
+function syncPRMobile() {
+  // Sync mobile PR inputs to main prMatch state
+  document.getElementById('prGender').value = document.getElementById('prGenderMobile').value;
+  document.getElementById('prEvent').value  = document.getElementById('prEventMobile').value;
+  document.getElementById('prTime').value   = document.getElementById('prTimeMobile').value;
+  applyPR();
+  // Update mobile banner
+  const banner = document.getElementById('prBannerMobile');
+  if (prMatch.event && prMatch.time) {
+    banner.style.display = 'block';
+    banner.textContent = `Matching: ${prMatch.event} ${prMatch.time} (${prMatch.gender})`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function clearPRMobile() {
+  document.getElementById('prGenderMobile').value = 'men';
+  document.getElementById('prEventMobile').value  = '';
+  document.getElementById('prTimeMobile').value   = '';
+  document.getElementById('prBannerMobile').style.display = 'none';
+  clearPR();
+}
+
 function getMatchTier(school, gender, event, timeStr) {
   // Compare PR against team's current season top performers from TFRRS
   // Recruit  = faster than or within 1% of team's #1 time
@@ -1136,9 +1454,60 @@ function getMatchTier(school, gender, event, timeStr) {
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
+function toggleFavorite(schoolId, event) {
+  event.stopPropagation(); // don't expand card
+  if (favorites.has(schoolId)) {
+    favorites.delete(schoolId);
+  } else {
+    favorites.add(schoolId);
+  }
+  localStorage.setItem('splits_favorites', JSON.stringify([...favorites]));
+  // Update button state
+  const btn = document.getElementById('fav-' + schoolId);
+  if (btn) {
+    btn.classList.toggle('favorited', favorites.has(schoolId));
+    btn.innerHTML = favorites.has(schoolId) ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+    btn.title = favorites.has(schoolId) ? 'Remove from saved' : 'Save school';
+  }
+  // If currently viewing favorites, re-filter
+  if (filters.division === 'favorites') filterSchools();
+}
+
+function setSort(sort, el) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filterSchools();
+}
+
+function getSortedSchools(list) {
+  if (currentSort === 'alpha') {
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  }
+  if (currentSort === 'fastest') {
+    // Sort by fastest time in selected event(s), schools with no data go to bottom
+    const eventSet = filters.events && filters.events.size > 0
+      ? filters.events
+      : (filters.event ? new Set([filters.event]) : new Set());
+    const gender = filters.gender === 'both' ? 'men' : filters.gender;
+
+    return [...list].sort((a, b) => {
+      const getTime = school => {
+        const perfs = school.performances?.[gender]?.outdoor?.current || [];
+        const matches = perfs.filter(p => eventSet.size === 0 || eventSet.has(p.event));
+        if (matches.length === 0) return Infinity;
+        const times = matches.map(p => parseTime(p.time)).filter(t => t && isFinite(t));
+        return times.length ? Math.min(...times) : Infinity;
+      };
+      return getTime(a) - getTime(b);
+    });
+  }
+  return list;
+}
+
 function renderSchools(list) {
   const grid = document.getElementById('schoolGrid');
-  let toRender = list || schools;
+  let toRender = getSortedSchools(list || schools);
 
   if (toRender.length === 0) {
     grid.innerHTML = `<div class="empty-state">
@@ -1164,16 +1533,19 @@ function renderSchools(list) {
 
 function buildInlineRows(school) {
   // Only show inline rows when event filter is active
-  const event = filters.event;
-  if (!event) return '';
+  const eventSet = filters.events && filters.events.size > 0 ? filters.events : (filters.event ? new Set([filters.event]) : new Set());
+  if (eventSet.size === 0) return '';
+  const event = eventSet.size === 1 ? [...eventSet][0] : null; // for PR matching
 
   const genders = filters.gender === 'both' ? ['men','women'] : [filters.gender];
   const rows = [];
 
   genders.forEach(gender => {
     const perfs = school.performances?.[gender]?.outdoor?.current || [];
-    const match = perfs.find(p => p.event === event);
-    if (!match) return;
+    const eventMatches = perfs.filter(p => eventSet.has(p.event));
+    if (eventMatches.length === 0) return;
+    eventMatches.forEach(match => {
+    const event = match.event;
 
     const genderLabel = filters.gender === 'both'
       ? `<span style="font-size:0.7rem;color:var(--ink-faint);font-family:var(--font-mono);margin-right:4px;">${gender === 'men' ? 'M' : 'W'}</span>`
@@ -1188,12 +1560,13 @@ function buildInlineRows(school) {
     rows.push(`
       <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;">
         ${genderLabel}
+        <span style="font-size:0.72rem;color:var(--ink-faint);font-family:var(--font-mono);">${match.event}</span>
         <span style="font-family:var(--font-mono);font-size:0.85rem;font-weight:500;color:var(--ink);">${match.time}</span>
         <span style="font-size:0.78rem;color:var(--ink-mid);">${match.athlete}</span>
         <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);">${match.grade || ''}</span>
-        <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);">${match.year || ''}</span>
         ${tierDot}
       </div>`);
+    }); // close eventMatches.forEach
   });
 
   return rows.join('');
@@ -1227,11 +1600,20 @@ function renderSchoolCard(school) {
           <div class="school-name">${school.name}</div>
           ${hasNoData ? '<span style="font-size:0.68rem;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:2px 7px;font-weight:500;">⚠ no data</span>' : ''}
         </div>
-        <div class="school-meta">${school.conference || ''} · ${school.state || ''}</div>
+        <div class="school-meta">
+          ${school.conference || ''} · ${school.state || ''}
+          ${school.tfrrs_url ? `<a href="${school.tfrrs_url}" target="_blank" onclick="event.stopPropagation()" style="color:var(--teal);text-decoration:none;font-size:0.72rem;margin-left:6px;">TFRRS ↗</a>` : ''}
+        </div>
         ${inlineRows}
       </div>
       <div class="card-badges">
         ${matchBadge}
+        <button class="fav-btn ${favorites.has(school.id) ? 'favorited' : ''}"
+          id="fav-${school.id}"
+          onclick="toggleFavorite('${school.id}', event)"
+          title="${favorites.has(school.id) ? 'Remove from saved' : 'Save school'}">
+          ${favorites.has(school.id) ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'}
+        </button>
         <span class="badge ${divBadge}">${school.division}</span>
         <span class="expand-icon">▾</span>
       </div>
