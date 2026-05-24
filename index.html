@@ -1119,17 +1119,22 @@ function getMatchTier(school, gender, event, timeStr) {
   if (eventPerfs.length === 0) return null;
 
   // Get the top (fastest) time for this event
-  const times = eventPerfs.map(p => parseTime(p.time)).filter(Boolean);
+  const times = eventPerfs.map(p => parseTime(p.time)).filter(t => t && isFinite(t) && t > 0);
   if (times.length === 0) return null;
   const topTime = Math.min(...times);
+  if (!topTime || !isFinite(topTime) || topTime <= 0) return null;
 
   // For running, lower time = faster = better
-  // Calculate how much slower the PR is vs the team's best
   const pctSlower = (prTime - topTime) / topTime;
 
-  if (pctSlower <= 0.01) return 'recruit';   // within 1% of #1 = recruit level
-  if (pctSlower <= 0.03) return 'walkon';    // within 3% = walk-on
-  if (pctSlower <= 0.06) return 'tryout';    // within 6% = tryout
+  // Debug — remove after testing
+  if (school.name === 'Shippensburg' || school.name === 'Albion College') {
+    console.log(school.name, event, 'topTime:', topTime, 'prTime:', prTime, 'pct:', pctSlower, 'rawTimes:', eventPerfs.map(p=>p.time));
+  }
+
+  if (pctSlower <= 0.01) return 'recruit';
+  if (pctSlower <= 0.03) return 'walkon';
+  if (pctSlower <= 0.06) return 'tryout';
   return null;
 }
 
